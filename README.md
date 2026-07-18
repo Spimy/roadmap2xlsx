@@ -27,6 +27,7 @@ Roadmap2XLSX converts your GitHub project roadmap (in TSV format) into a beautif
 - **📝 TSV Parsing:** Reads GitHub project roadmaps exported as TSV.
 - **🗂️ Task Grouping:** Automatically groups tasks by repository.
 - **🧾 Assignee Mapping:** Map GitHub usernames to display names via JSON.
+- **📅 Smart Sorting:** Automatically sorts tasks chronologically by start date.
 - **📆 Gantt Timeline:** Generates a full-week Gantt chart.
 - **🎨 Conditional Formatting:** Creates a polished Excel output.
 - **⚡ CLI Simplicity:** Run directly via `npx roadmap2xlsx` or install globally.
@@ -35,15 +36,24 @@ Roadmap2XLSX converts your GitHub project roadmap (in TSV format) into a beautif
 
 Refer to GitHub's guide on [Exporting Your Projects Data](https://docs.github.com/en/issues/planning-and-tracking-with-projects/managing-your-project/exporting-your-projects-data).
 
-## 📦 Installation & Usage
+## 📦 Installation & Usage (This Fork)
 
-**Run without installation (the original, not this fork):**
+Since this fork is not published to npm, you will need to clone and run it locally.
 
 ```sh
-npx roadmap2xlsx --input path/to/tasks.tsv --output path/to/roadmap.xlsx
+# Clone the repository
+git clone https://github.com/Spimy/roadmap2xlsx.git
+cd roadmap2xlsx
+
+# Install dependencies
+pnpm install
+
+# Run the CLI
+pnpm dev --input path/to/tasks.tsv --output path/to/roadmap.xlsx
+
 ```
 
-## 🧾 Assignee Map
+### 🧾 Assignee Map
 
 **Map assignee usernames to display names (useful for GH username > real name):**
 
@@ -51,28 +61,25 @@ Inline JSON:
 
 ```sh
 pnpm dev --input path/to/tasks.tsv --output path/to/roadmap.xlsx --assignee-map '{"Spimy":"Official Spimy"}'
+
 ```
 
 JSON file:
 
 ```sh
 pnpm dev --input path/to/tasks.tsv --output path/to/roadmap.xlsx --assignee-map path/to/assignee-map.json
+
 ```
 
-Example `assignee-map.json`:
+---
 
-```json
-{
-  "spimy": "Official Spimy"
-}
-```
+### 📦 Using the Original Upstream Package
 
-**Or install globally (the original, not this fork):**
+If you do not need the assignee mapping or date-sorting features added in this fork, you can use the original upstream package directly without cloning:
 
 ```sh
-npm install -g roadmap2xlsx
+npx roadmap2xlsx --input path/to/tasks.tsv --output path/to/roadmap.xlsx
 
-roadmap2xlsx --input path/to/tasks.tsv --output path/to/roadmap.xlsx
 ```
 
 ## 🔧 Development
