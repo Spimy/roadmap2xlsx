@@ -36,7 +36,7 @@ Refer to GitHub's guide on [Exporting Your Projects Data](https://docs.github.co
 
 ## 📦 Installation & Usage
 
-**Run without installation:**
+**Run without installation (the original, not this fork):**
 
 ```sh
 npx roadmap2xlsx --input path/to/tasks.tsv --output path/to/roadmap.xlsx
@@ -66,7 +66,7 @@ Example `assignee-map.json`:
 }
 ```
 
-**Or install globally:**
+**Or install globally (the original, not this fork):**
 
 ```sh
 npm install -g roadmap2xlsx
