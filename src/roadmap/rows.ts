@@ -1,8 +1,8 @@
 import { Row, Worksheet } from "exceljs";
-import { Repo, Task } from "../types";
-import { borders, font, alignment, fill } from "../config/styles";
-import { CELL_HEIGHT, LAYOUT } from "../config/layout";
 import { COLORS } from "../config/colors";
+import { CELL_HEIGHT, LAYOUT } from "../config/layout";
+import { alignment, borders, fill, font } from "../config/styles";
+import { Repo, Task } from "../types";
 
 export const statusProgress: Record<string, number> = {
   Todo: 0,
@@ -68,12 +68,20 @@ function addTaskRow(
   row.getCell(details.col + 2).value = statusProgress[task.status] ?? 0;
 
   const startCell = row.getCell(details.col + 3);
-  startCell.value = task.startDate;
-  startCell.numFmt = "dd.mm.yyyy";
+  if (isNaN(task.startDate.getTime())) {
+    startCell.value = null;
+  } else {
+    startCell.value = task.startDate;
+    startCell.numFmt = "dd.mm.yyyy";
+  }
 
   const endCell = row.getCell(details.col + 4);
-  endCell.value = task.endDate;
-  endCell.numFmt = "dd.mm.yyyy";
+  if (isNaN(task.endDate.getTime())) {
+    endCell.value = null;
+  } else {
+    endCell.value = task.endDate;
+    endCell.numFmt = "dd.mm.yyyy";
+  }
 
   for (let col = details.col; col < timeline.col; col++) {
     const cell = row.getCell(col);

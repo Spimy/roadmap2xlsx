@@ -7,6 +7,8 @@ export interface Task {
   endDate: Date;
 }
 
+export type AssigneeMap = Record<string, string>;
+
 export interface Repo {
   name: string;
   tasks: Task[];

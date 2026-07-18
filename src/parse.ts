@@ -1,8 +1,11 @@
-import fs from "fs";
 import csv from "csv-parser";
-import { Task, Project } from "./types";
+import fs from "fs";
+import { AssigneeMap, Project, Task } from "./types";
 
-export async function parseTsv(inputPath: string): Promise<Project> {
+export async function parseTsv(
+  inputPath: string,
+  assigneeMap: AssigneeMap = {},
+): Promise<Project> {
   const repoMap: Record<string, Task[]> = {};
 
   await new Promise<void>((resolve, reject) => {
@@ -15,7 +18,7 @@ export async function parseTsv(inputPath: string): Promise<Project> {
         const task: Task = {
           title: row.Title || "",
           url: row.URL || "",
-          assignee: row.Assignees || "",
+          assignee: mapAssignees(row.Assignees || "", assigneeMap),
           status: row.Status || "Todo",
           startDate: parseDate(row["Start Date"]),
           endDate: parseDate(row["Target Date"]),
@@ -30,10 +33,22 @@ export async function parseTsv(inputPath: string): Promise<Project> {
       .on("error", reject);
   });
 
-  const repos = Object.entries(repoMap).map(([name, tasks]) => ({
-    name,
-    tasks,
-  }));
+  const repos = Object.entries(repoMap)
+    .map(([name, tasks]) => ({
+      name,
+      tasks: tasks.sort(
+        (a, b) => getDateSortValue(a.startDate) - getDateSortValue(b.startDate),
+      ),
+    }))
+    .sort((a, b) => {
+      const aStart = a.tasks[0]?.startDate
+        ? getDateSortValue(a.tasks[0].startDate)
+        : Number.POSITIVE_INFINITY;
+      const bStart = b.tasks[0]?.startDate
+        ? getDateSortValue(b.tasks[0].startDate)
+        : Number.POSITIVE_INFINITY;
+      return aStart - bStart;
+    });
   const allTasks = Object.values(repoMap).flat();
 
   const allStartDates = allTasks
@@ -64,7 +79,29 @@ export async function parseTsv(inputPath: string): Promise<Project> {
 }
 
 function parseDate(dateString: string): Date {
-  const [month, dayStr, yearStr] = dateString.replace(",", "").split(" ");
+  const trimmedDateString = dateString.trim();
+  if (!trimmedDateString) {
+    return new Date(NaN);
+  }
+
+  const isoMatch = trimmedDateString.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (isoMatch) {
+    const [, yearStr, monthStr, dayStr] = isoMatch;
+    return new Date(
+      Date.UTC(
+        parseInt(yearStr, 10),
+        parseInt(monthStr, 10) - 1,
+        parseInt(dayStr, 10),
+      ),
+    );
+  }
+
+  const [month, dayStr, yearStr] = trimmedDateString
+    .replace(",", "")
+    .split(" ");
+  if (!month || !dayStr || !yearStr) {
+    return new Date(NaN);
+  }
   const day = parseInt(dayStr, 10);
   const year = parseInt(yearStr, 10);
 
@@ -85,8 +122,22 @@ function parseDate(dateString: string): Date {
 
   const monthIndex = monthMap[month];
   if (monthIndex === undefined) {
-    throw new Error(`Invalid month: ${month}`);
+    return new Date(NaN);
   }
 
   return new Date(Date.UTC(year, monthIndex, day));
+}
+
+function getDateSortValue(date: Date): number {
+  const time = date.getTime();
+  return Number.isNaN(time) ? Number.POSITIVE_INFINITY : time;
+}
+
+function mapAssignees(assignees: string, assigneeMap: AssigneeMap): string {
+  return assignees
+    .split(",")
+    .map((assignee) => assignee.trim())
+    .filter(Boolean)
+    .map((assignee) => assigneeMap[assignee] ?? assignee)
+    .join(", ");
 }

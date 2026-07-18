@@ -1,13 +1,13 @@
 import {
+  afterEach,
+  beforeEach,
   describe,
   expect,
   it,
   jest,
-  beforeEach,
-  afterEach,
 } from "@jest/globals";
-import { Readable } from "stream";
 import fs from "fs";
+import { Readable } from "stream";
 import { parseTsv } from "./parse";
 import { Project } from "./types";
 
@@ -87,6 +87,21 @@ Task 3\thttps://github.com/owner/repoB\tCharlie\tIn Progress\t2021-02-01T00:00:0
     expect(task1?.endDate.getTime()).toBe(new Date("2021-01-05").getTime());
   });
 
+  it("should map assignees using the provided username map", async () => {
+    const parsedProject: Project = await parseTsv("dummy-path", {
+      Alice: "Alice Johnson",
+      Bob: "Bob Smith",
+      Charlie: "Charlie Brown",
+    });
+
+    const repoA = parsedProject.repos.find((r) => r.name === "owner/repoA");
+    const repoB = parsedProject.repos.find((r) => r.name === "owner/repoB");
+
+    expect(repoA?.tasks[0]?.assignee).toBe("Alice Johnson");
+    expect(repoA?.tasks[1]?.assignee).toBe("Bob Smith");
+    expect(repoB?.tasks[0]?.assignee).toBe("Charlie Brown");
+  });
+
   it("should return totalDays extended to a multiple of 7", async () => {
     const parsedProject: Project = await parseTsv("dummy-path");
 
@@ -95,5 +110,28 @@ Task 3\thttps://github.com/owner/repoB\tCharlie\tIn Progress\t2021-02-01T00:00:0
     // Then extend to the next multiple of 7, i.e. 42.
     const expectedTotalDays = 42;
     expect(parsedProject.totalDays).toBe(expectedTotalDays);
+  });
+
+  it("should sort repos and tasks by start date", async () => {
+    const unsortedTsvData = `Title\tURL\tAssignees\tStatus\tStart Date\tTarget Date
+Task B\thttps://github.com/owner/repoB\tCharlie\tIn Progress\t2021-02-01T00:00:00\t2021-02-05T00:00:00
+Task A2\thttps://github.com/owner/repoA\tBob\tDone\t2021-01-06T00:00:00\t2021-01-10T00:00:00
+Task A1\thttps://github.com/owner/repoA\tAlice\tTodo\t2021-01-01T00:00:00\t2021-01-05T00:00:00
+`;
+
+    (fs.createReadStream as jest.Mock).mockReturnValue(
+      Readable.from(unsortedTsvData),
+    );
+
+    const parsedProject: Project = await parseTsv("dummy-path");
+
+    expect(parsedProject.repos.map((repo) => repo.name)).toEqual([
+      "owner/repoA",
+      "owner/repoB",
+    ]);
+    expect(parsedProject.repos[0]?.tasks.map((task) => task.title)).toEqual([
+      "Task A1",
+      "Task A2",
+    ]);
   });
 });

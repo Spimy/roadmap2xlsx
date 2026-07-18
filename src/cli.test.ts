@@ -1,14 +1,14 @@
-import { main } from "./cli";
-import { parseTsv } from "./parse";
-import { generateRoadmap } from "./roadmap";
 import {
+  afterEach,
+  beforeEach,
   describe,
   expect,
   it,
   jest,
-  beforeEach,
-  afterEach,
 } from "@jest/globals";
+import { main } from "./cli";
+import { parseTsv } from "./parse";
+import { generateRoadmap } from "./roadmap";
 import { Project, Repo } from "./types";
 
 // Create typed versions of our mocked functions.
@@ -89,7 +89,7 @@ describe("CLI entrypoint", () => {
 
     await main();
 
-    expect(parseTsvMock).toHaveBeenCalledWith("dummy-input.tsv");
+    expect(parseTsvMock).toHaveBeenCalledWith("dummy-input.tsv", {});
     expect(generateRoadmapMock).toHaveBeenCalledWith(
       fakeProject,
       "dummy-output.xlsx",
@@ -97,6 +97,35 @@ describe("CLI entrypoint", () => {
     expect(consoleLogSpy).toHaveBeenCalledWith(
       "Roadmap successfully saved to dummy-output.xlsx",
     );
+  });
+
+  it("should pass an inline assignee map to parseTsv", async () => {
+    process.argv = [
+      "node",
+      "cli.js",
+      "--input",
+      "dummy-input.tsv",
+      "--output",
+      "dummy-output.xlsx",
+      "--assignee-map",
+      '{"spimy":"Spimy Wolf"}',
+    ];
+
+    const fakeProject: Project = {
+      startDate: new Date(),
+      endDate: new Date(),
+      totalDays: 42,
+      repos: [] as Repo[],
+    };
+
+    parseTsvMock.mockResolvedValue(fakeProject);
+    generateRoadmapMock.mockResolvedValue(undefined);
+
+    await main();
+
+    expect(parseTsvMock).toHaveBeenCalledWith("dummy-input.tsv", {
+      spimy: "Spimy Wolf",
+    });
   });
 
   it("should exit with error if generateRoadmap fails", async () => {

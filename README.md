@@ -17,6 +17,7 @@ Roadmap2XLSX converts your GitHub project roadmap (in TSV format) into a beautif
 - [🚀 Features](#-features)
 - [📥 How to Export Your GitHub Roadmap Data](#-how-to-export-your-github-roadmap-data)
 - [📦 Installation \& Usage](#-installation--usage)
+- [🧾 Assignee Map](#-assignee-map)
 - [🔧 Development](#-development)
 - [📁 Project Structure](#-project-structure)
 - [📜 License \& Credits](#-license--credits)
@@ -39,6 +40,30 @@ Refer to GitHub's guide on [Exporting Your Projects Data](https://docs.github.co
 
 ```sh
 npx roadmap2xlsx --input path/to/tasks.tsv --output path/to/roadmap.xlsx
+```
+
+## 🧾 Assignee Map
+
+**Map assignee usernames to display names (useful for GH username > real name):**
+
+Inline JSON:
+
+```sh
+pnpm dev --input path/to/tasks.tsv --output path/to/roadmap.xlsx --assignee-map '{"Spimy":"Official Spimy"}'
+```
+
+JSON file:
+
+```sh
+pnpm dev --input path/to/tasks.tsv --output path/to/roadmap.xlsx --assignee-map path/to/assignee-map.json
+```
+
+Example `assignee-map.json`:
+
+```json
+{
+  "spimy": "Official Spimy"
+}
 ```
 
 **Or install globally:**
