@@ -26,6 +26,7 @@ Roadmap2XLSX converts your GitHub project roadmap (in TSV format) into a beautif
 
 - **📝 TSV Parsing:** Reads GitHub project roadmaps exported as TSV.
 - **🗂️ Task Grouping:** Automatically groups tasks by repository.
+- **🧾 Assignee Mapping:** Map GitHub usernames to display names via JSON.
 - **📆 Gantt Timeline:** Generates a full-week Gantt chart.
 - **🎨 Conditional Formatting:** Creates a polished Excel output.
 - **⚡ CLI Simplicity:** Run directly via `npx roadmap2xlsx` or install globally.
